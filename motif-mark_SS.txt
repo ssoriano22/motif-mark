@@ -1,0 +1,24 @@
+OoCA Motif Mark Assignment:
+Sophia Soriano
+17FEB2023
+
+List of Possible Classes:
+---------------------------------
+* Exon (Rectangle):
+    ** init: start+end (x,y) coords, color
+    ** draw_rectangle(context): draw shape on passed pycairo context, uses coords (based on exon seq length) and color
+* Intron (Line):
+    ** init: start+end (x,y) coords, color
+    ** draw_line(context): draw line on passed pycairo context, uses coords (based on intron seq length) and color
+* Motif (Line + Arrow + Text):
+    ** init: start+end (x,y) coords for line + arrow (+ text?), color(s) for different motifs
+    ** draw_motif(context): draw motif (line and arrow) objects using coords and color. Width of line = length of motif seq?
+
+Interactions:
+---------------------------------
+* Create exon objects to scale based on length of uppercase section of FASTA seq
+* Create intron objects to scale based on length of lowercase sections of FASTA seq
+* Create motif object for each different type of motif in txt input file (4 total) 
+* Parse intron seqs for motif seqs - when motif is found, draw_motif at that location in intron seq
+* Parse exon seq for motif seqs - when motif is found, draw_motif at that location in exon seq
+* 4 possible motif objects to be scanned for/potentially drawn on top of either intron (line) or exon (rectangle) objects
