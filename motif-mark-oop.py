@@ -63,29 +63,29 @@ class Gene:
     
     def draw_motifmap(self,ctx3,c_height,margin,the_UpIntron,the_Exon,the_DownIntron):
         '''Draw motifmap for gene with pycairo. Enter context object to draw on.'''
-        print("Full Gene Motif Map")
-        print(self.motifmap)
-        print("Intron/Exon/Intron Motif Map")
+        # print("Full Gene Motif Map")
+        # print(self.motifmap)
+        # print("Intron/Exon/Intron Motif Map")
         mcolor_r = (0.1,0.2,0.4,0.5,0.6,0.8)
         mcolor_g = (0.5,0.2,0.8,0.1,0.4,0.6)
         mcolor_b = (0.4,0.5,0.6,0.8,0.1,0.2)
         for gkey,gseq in self.motifmap.items():
             #0 = up_intron, 1 = exon, 2 = down_intron
-            print("Gene Level")
-            print(gkey)
-            print(gseq)
+            # print("Gene Level")
+            # print(gkey)
+            # print(gseq)
             i = 0 # Motif Color index - use diff color for each motif (max 5)
             for mkey,motseq in gseq.items():
                 #Motif (key) and dict (value) of each coords motif was found
-                print("Motif Level")
-                print(mkey) #Motif
-                print(motseq) #Dict: {(coords):motif}
+                # print("Motif Level")
+                # print(mkey) #Motif
+                # print(motseq) #Dict: {(coords):motif}
                 for ckey,mstr in motseq.items():
                     #Coords:Motif Dict
-                    print("Coords Level")
-                    print(ckey)
-                    print(mstr)
-                    print(i)
+                    # print("Coords Level")
+                    # print(ckey)
+                    # print(mstr)
+                    # print(i)
                     ctx3.set_line_width(100)
                     ctx3.set_source_rgb(mcolor_r[i],mcolor_g[i],mcolor_b[i])
                     if gkey == 0: #Up-Intron
@@ -139,8 +139,6 @@ class Motif:
             rx_mseq = re.sub("V","[ACG]",rx_mseq)
         if "N" in self.mseq:
             rx_mseq = re.sub("N","[ACGTU]",rx_mseq)
-        # print(cseq)
-        # print(rx_mseq)
 
         for match in re.finditer(rx_mseq,cseq.upper()):
             # print(match.group())
@@ -156,6 +154,16 @@ def get_args():
     parser.add_argument("-f","--file",help="Input FASTA file",type=str)
     parser.add_argument("-m","--motifs",help="Input file with motifs",type=str)
     return parser.parse_args()
+
+def write_Text(ctx4,font_size,start_coord,content):
+    ctx4.set_source_rgb(0,0,0)
+    ctx4.set_font_size(35)
+    ctx4.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+    title_text = "Motif Mark Map: " + input_filename
+    print(len(title_text))
+    ctx4.move_to(canvas_width, 50)
+    ctx4.show_text(title_text)
+    ctx4.stroke()
 
 #Get argparse variables
 args = get_args()
@@ -182,6 +190,16 @@ surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, canvas_width, canvas_height)
 context = cairo.Context(surface)
 context.set_source_rgb(1, 1, 1)
 context.paint()
+# Add title
+# Pycairo text - https://www.geeksforgeeks.org/pycairo-displaying-text/
+context.set_source_rgb(0,0,0)
+context.set_font_size(35)
+context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+title_text = "Motif Mark Map: " + input_filename
+print(len(title_text))
+context.move_to(canvas_width, 50)
+context.show_text(title_text)
+context.stroke()
 
 #Read in oneline fasta
 i = 0 #Initialize counter - for testing
@@ -197,6 +215,7 @@ with open(output_filename,"r") as fh_fasta:
         #EOF case:
         if current_header == "":
             break
+        print("Processing Gene " + str(i) + "...")
         current_genename = re.split(">",current_header)[1].split(" ")[0]
         current_geneend = re.split(">",current_header)[1].split(" ")[1].split("-")[1]
         current_genechr = re.split(">",current_header)[1].split(" ")[1].split("-")[0].split(":")[0]
@@ -210,7 +229,15 @@ with open(output_filename,"r") as fh_fasta:
         currentUpIntron = Intron(current_Xons[0],n,g,(n+len(current_Xons[0])),g)
         currentExon = Exon(current_Xons[1],(n+len(current_Xons[0])),g,(n+len(current_Xons[0]+current_Xons[1])),g)
         currentDownIntron = Intron(current_Xons[2],(n+len(current_Xons[0]+current_Xons[1])),g,(n+len(current_Xons[0]+current_Xons[1]+current_Xons[2])),g)
-        #Draw introns and exon objects to context/pycairo surface
+        #Draw introns and exon objects to context/pycairo surface w/ current Gene title
+        write_Text(context,)
+        context.set_source_rgb(0,0,0)
+        context.set_font_size(25)
+        context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        context.move_to(100, (currentUpIntron.Ly1 - 80))
+        gene_text = currentGene.name + " " + currentGene.chr + ": " + currentGene.startLoc + "-" + currentGene.endLoc
+        context.show_text(gene_text)
+        context.stroke()
         currentUpIntron.draw_intron(context)
         currentExon.draw_exon(context)
         currentDownIntron.draw_intron(context)
