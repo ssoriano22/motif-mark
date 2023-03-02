@@ -55,6 +55,7 @@ def oneline_fasta(inputfile,outputfile):
     '''Given input FASTA file and output file name, returns new FASTA file with 2-line
     per record (1 header line, 1 seq line) format'''
     #Open input fasta file and intermediate output fasta file (seq on one line) and separate records
+    n = 0 #Count number of records
     with open(inputfile,"r") as fh:
         with open(outputfile,"w") as fh2:
             #For each record in fasta file
@@ -69,6 +70,7 @@ def oneline_fasta(inputfile,outputfile):
                         #For all other header lines besides first line in file
                         #print(f"\n{line}")
                         fh2.write(f"\n{line}\n")
+                    n += 1
                 else:
                     #For seq lines
                     #print(line, end="")
@@ -76,6 +78,7 @@ def oneline_fasta(inputfile,outputfile):
             #For end of file
             #print("")
             fh2.write("\n")
+    return n
 
 def rev_comp(inputDNA):
     '''Given an input DNA index sequence, returns the reverse complement of that sequence'''

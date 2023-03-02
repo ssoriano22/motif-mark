@@ -61,14 +61,8 @@ class Gene:
         Xons = (intron_up, exon, intron_down)
         return Xons
     
-    def draw_motifmap(self,ctx3,c_height,margin,the_UpIntron,the_Exon,the_DownIntron):
+    def draw_motifmap(self,ctx3,c_height,margin,colors_mot,the_UpIntron,the_Exon,the_DownIntron):
         '''Draw motifmap for gene with pycairo. Enter context object to draw on.'''
-        # print("Full Gene Motif Map")
-        # print(self.motifmap)
-        # print("Intron/Exon/Intron Motif Map")
-        mcolor_r = (0.1,0.2,0.4,0.5,0.6,0.8)
-        mcolor_g = (0.5,0.2,0.8,0.1,0.4,0.6)
-        mcolor_b = (0.4,0.5,0.6,0.8,0.1,0.2)
         for gkey,gseq in self.motifmap.items():
             #0 = up_intron, 1 = exon, 2 = down_intron
             # print("Gene Level")
@@ -87,7 +81,7 @@ class Gene:
                     # print(mstr)
                     # print(i)
                     ctx3.set_line_width(100)
-                    ctx3.set_source_rgb(mcolor_r[i],mcolor_g[i],mcolor_b[i])
+                    ctx3.set_source_rgb(colors_mot[i][0],colors_mot[i][1],colors_mot[i][2])
                     if gkey == 0: #Up-Intron
                         ctx3.move_to(margin+ckey[0],c_height)  #(x1,y1) #margin = n (100 in this case), c_height altered per gene in main code
                         ctx3.line_to(margin+ckey[1],c_height) #(x2,y2)
@@ -191,15 +185,27 @@ def draw_Legend(ctx5,colors,motif_set,canvas_w):
     ctx5.move_to((legend_margin+280)+100,legend_margin*2)  #(x1,y1)
     ctx5.line_to((legend_margin+280)+100,legend_margin*2+legend_h) #(x2,y2)
     ctx5.stroke()
-    #Draw blank motif
-    ctx5.set_source_rgb(0, 0, 0)
-    ctx5.rectangle((legend_margin+380)+50,legend_margin*2+20,10,100) #(startx,starty,width,height)
-    ctx5.set_line_width(2)
-    ctx5.stroke()
-    write_Text(ctx5,25,legend_margin+460,(legend_margin*2+78),"Motif")
-    #ctx5.fill()
+    #Write Motif legend header
+    write_Text(ctx5,25,legend_margin+715,(legend_margin*2+30),"Motif")
+    #Draw motif color legend
+    m=0 #Increment start_x per motif
+    num_mot = len(motif_set)
+    count = 0 #Count iterations
+    for m_type in motif_set:
+        ctx5.set_line_width(50)
+        m_red = motif_colors[count][0]
+        m_green = motif_colors[count][1]
+        m_blue = motif_colors[count][2]
+        ctx5.set_source_rgb(m_red,m_green,m_blue)
+        ctx5.move_to(legend_margin+420+m,(legend_h+230)/2)
+        ctx5.line_to(legend_margin+425+m,(legend_h+230)/2)
+        ctx5.stroke()
+        write_Text(ctx5,15,legend_margin+435+m,(legend_h+245)/2,m_type.mseq)
+        if num_mot == 1:
+            pass
+        m += 140
+        count += 1
     print("Legend successfully drawn!")
-    pass
 
 #Get argparse variables
 args = get_args()
@@ -231,7 +237,7 @@ title_text = "Motif Mark Map: " + input_filename
 write_Text(context,35,100,50,title_text)
 write_Text(context,15,50,80,"~*~"*(canvas_width//25-1))
 #Add Legend
-motif_colors = ("DC143C","DC143C","DC143C","DC143C","DC143C") #"DC143C" = crimson
+motif_colors = ((0.8,0.2,0.1),(0.2,0.8,0.2),(0.5,0.2,0.8),(0.1,0.1,0.8),(1,0.2,0.6)) #Scarlet,Green,Purple,Blue,Pink
 draw_Legend(context,motif_colors,known_motif_set,canvas_width)
 
 #Read in oneline fasta
@@ -287,7 +293,7 @@ with open(output_filename,"r") as fh_fasta:
         #print(mcoords_gene_dict)
         #Add gene motif map to current Gene object
         currentGene.motifmap = mcoords_gene_dict
-        currentGene.draw_motifmap(context,g,n,currentUpIntron,currentExon,currentDownIntron)
+        currentGene.draw_motifmap(context,g,n,motif_colors,currentUpIntron,currentExon,currentDownIntron)
         #Increment n according to total x length drawn for this gene
         g += (canvas_height/12)
 
