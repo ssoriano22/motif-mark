@@ -23,6 +23,7 @@ The resulting output is a ".png" image with the same prefix as the input FASTA f
         * Start locations are staggered along the y-axis per motif type (i.e. left-most motif in legend starts closest to drawn gene, right-most motif in legend is furthest from drawn gene).
         * To avoid most print overlap situations, start locations are printed alternatively above and below the gene, per motif.
         * **Warning:** In cases where a single motif is repeated in close proximity, it is possible that these start locations will overlap.
+        * Examples are included in this repository of -s True (Figure_1_ExampleYesMotifStarts.png) and -s False or default (Figure_1_ExampleYesMotifStarts.png) image outputs
 
 ## Assignment Requirements (from Bi625 Canvas):
 
