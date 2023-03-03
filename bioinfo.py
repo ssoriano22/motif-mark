@@ -11,7 +11,7 @@
 convert_phred, qual_score, validate_DNA_seq, validate_base_seq, gc_content, and
 oneline_fasta. Use --help on any of these functions to learn more about each. '''
 
-__version__ = "0.4"         # Read way more about versioning here:
+__version__ = "0.5"         # Read way more about versioning here:
                             # https://en.wikipedia.org/wiki/Software_versioning
 
 DNA_bases = ""
