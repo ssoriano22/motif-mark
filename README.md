@@ -1,4 +1,3 @@
-motif-mark
 # Bi625 Motif-Mark
 
 ## Program Description
