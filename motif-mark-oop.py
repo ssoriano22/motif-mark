@@ -23,7 +23,7 @@ class Exon:
         ctx.move_to(self.start_x,self.start_y)  #(x1,y1)
         ctx.line_to(self.end_x,self.end_y) #(x2,y2)
         ctx.stroke()
-        print("Exon successfully drawn!")
+        #print("Exon successfully drawn!")
 
 class Intron:
     
@@ -41,7 +41,7 @@ class Intron:
         ctx2.move_to(self.Lx1,self.Ly1)  #(x1,y1)
         ctx2.line_to(self.Lx2,self.Ly2) #(x2,y2)
         ctx2.stroke()
-        print("Intron successfully drawn!")
+        #print("Intron successfully drawn!")
 
 class Gene:
 
@@ -61,41 +61,53 @@ class Gene:
         Xons = (intron_up, exon, intron_down)
         return Xons
     
-    def draw_motifmap(self,ctx3,c_height,margin,colors_mot,the_UpIntron,the_Exon,the_DownIntron):
+    def draw_motifmap(self,ctx3,c_height,margin,colors_mot,the_UpIntron,the_Exon,the_DownIntron,showFlag):
         '''Draw motifmap for gene with pycairo. Enter context object to draw on.'''
         for gkey,gseq in self.motifmap.items():
-            #0 = up_intron, 1 = exon, 2 = down_intron
-            # print("Gene Level")
-            # print(gkey)
-            # print(gseq)
+            #Gene Level: 0 = up_intron, 1 = exon, 2 = down_intron
             i = 0 # Motif Color index - use diff color for each motif (max 5)
+            mot_yinc = 10
             for mkey,motseq in gseq.items():
-                #Motif (key) and dict (value) of each coords motif was found
-                # print("Motif Level")
-                # print(mkey) #Motif
-                # print(motseq) #Dict: {(coords):motif}
+                #Motif Level: Motif (key) and dict (value) of each coords motif was found
+                p_top = True
+                #print(motseq)
                 for ckey,mstr in motseq.items():
-                    #Coords:Motif Dict
-                    # print("Coords Level")
-                    # print(ckey)
-                    # print(mstr)
-                    # print(i)
-                    ctx3.set_line_width(100)
-                    ctx3.set_source_rgb(colors_mot[i][0],colors_mot[i][1],colors_mot[i][2])
-                    if gkey == 0: #Up-Intron
-                        ctx3.move_to(margin+ckey[0],c_height)  #(x1,y1) #margin = n (100 in this case), c_height altered per gene in main code
-                        ctx3.line_to(margin+ckey[1],c_height) #(x2,y2)
-                        ctx3.stroke()
-                    elif gkey == 1: #Exon
-                        ctx3.move_to(margin+len(the_UpIntron.iseq)+ckey[0],c_height)  #(x1,y1) #100 = n (margin), c_height altered per gene in main code
-                        ctx3.line_to(margin+len(the_UpIntron.iseq)+ckey[1],c_height) #(x2,y2)
-                        ctx3.stroke()
-                    else: #Down-Intron
-                        ctx3.move_to(margin+len(the_UpIntron.iseq)+len(the_Exon.eseq)+ckey[0],c_height)  #(x1,y1) #100 = n (margin), c_height altered per gene in main code
-                        ctx3.line_to(margin+len(the_UpIntron.iseq)+len(the_Exon.eseq)+ckey[1],c_height) #(x2,y2)
-                        ctx3.stroke()
+                    #Coords Level: Coords:Motif Dict
+                    if gkey == 0:
+                        #Draw Up-Intron Motifs
+                        draw_Line(ctx3,(colors_mot[i][0],colors_mot[i][1],colors_mot[i][2]),10,margin+ckey[0],c_height,margin+ckey[1],c_height)
+                        if showFlag == "True": #If showMotifStart arg is True, add start loc to image
+                            motif_coord_text = str(ckey[0])
+                            if p_top == True: #Print start coord above gene
+                                write_Text(ctx3,15,margin+ckey[0]-(len(motif_coord_text)*3),c_height-mot_yinc,motif_coord_text)
+                                p_top = False
+                            else:
+                                write_Text(ctx3,15,margin+ckey[0]-(len(motif_coord_text)*3),c_height+mot_yinc+10,motif_coord_text)
+                                p_top = True #Print start coord below gene
+                    elif gkey == 1:
+                        #Draw Exon Motifs
+                        draw_Line(ctx3,(colors_mot[i][0],colors_mot[i][1],colors_mot[i][2]),100,margin+len(the_UpIntron.iseq)+ckey[0],c_height,margin+len(the_UpIntron.iseq)+ckey[1],c_height)
+                        if showFlag == "True": #If showMotifStart arg is True, add start loc to image
+                            motif_coord_text = str(ckey[0]+len(the_UpIntron.iseq))
+                            if p_top == True: #Print start coord above gene
+                                write_Text(ctx3,15,margin+len(the_UpIntron.iseq)+ckey[0]-(len(motif_coord_text)*3),c_height-mot_yinc-60,motif_coord_text)
+                                p_top = False
+                            else:
+                                write_Text(ctx3,15,margin+len(the_UpIntron.iseq)+ckey[0]-(len(motif_coord_text)*3),c_height+mot_yinc+60+10,motif_coord_text)
+                                p_top = True #Print start coord below gene
+                    else:
+                        #Draw Down-Intron Motifs
+                        draw_Line(ctx3,(colors_mot[i][0],colors_mot[i][1],colors_mot[i][2]),10,margin+len(the_UpIntron.iseq)+len(the_Exon.eseq)+ckey[0],c_height,margin+len(the_UpIntron.iseq)+len(the_Exon.eseq)+ckey[1],c_height)
+                        if showFlag == "True": #If showMotifStart arg is True, add start loc to image
+                            motif_coord_text = str(ckey[0]+len(the_UpIntron.iseq)+len(the_Exon.eseq))
+                            if p_top == True: #Print start coord above gene
+                                write_Text(ctx3,15,margin+len(the_UpIntron.iseq)+len(the_Exon.eseq)+ckey[0]-(len(motif_coord_text)*3),c_height-mot_yinc,motif_coord_text)
+                                p_top = False
+                            else:
+                                write_Text(ctx3,15,margin+len(the_UpIntron.iseq)+len(the_Exon.eseq)+ckey[0]-(len(motif_coord_text)*3),c_height+mot_yinc+10,motif_coord_text)
+                                p_top = True #Print start coord below gene
                 i += 1
-
+                mot_yinc += 15
         print("Motif Map successfully drawn!")
 
 class Motif:
@@ -140,13 +152,13 @@ class Motif:
 
         return found_motif_loc_dict
 
-#Argparse
 def get_args():
     '''Argparse: Retrieves user-input arguments from command line.'''
-    parser = argparse.ArgumentParser(description="A program to create a genetic diagram (PNG) of motif locations in a given FASTA file. Inputs: -f INPUT_FILENAME.fasta -m MOTIFS_FILENAME.txt")
+    parser = argparse.ArgumentParser(description="A program to create a genetic diagram (PNG) of motif locations in a given FASTA file. Inputs: -f INPUT_FILENAME.fasta -m MOTIFS_FILENAME.txt -s True")
 
     parser.add_argument("-f","--file",help="Input FASTA file",type=str)
     parser.add_argument("-m","--motifs",help="Input file with motifs",type=str)
+    parser.add_argument("-s","--showMotifStart",default="False",help="Show motif start positions (True/False)",type=str)
     return parser.parse_args()
 
 def write_Text(ctx4,font_size,start_x_coord,start_y_coord,content):
@@ -201,12 +213,25 @@ def draw_Legend(ctx5,colors,motif_set,canvas_w):
             pass
         m += 140
         count += 1
-    print("Legend successfully drawn!")
+    #print("Legend successfully drawn!")
 
 #Get argparse variables
 args = get_args()
 input_FASTA = args.file
 input_motifs = args.motifs
+show_flag = args.showMotifStart
+
+#Confirm valid argparse entries
+if (input_FASTA == "") or (".fa" not in input_FASTA):
+    print("Please enter valid FASTA file. Use -h for help or reference README.md.")
+    exit()
+if (input_motifs == "") or (".txt" not in input_motifs):
+    print("Please enter valid motifs file. Use -h for help or reference README.md.")
+    exit()
+if show_flag != "False":
+    if show_flag != "True":
+        print("Please enter True or False for -s argument or remove -s argument. Use -h for help or reference README.md.")
+        exit()
 
 #Read in motifs.txt - store motif in known_motifs_set
 known_motif_set = set()
@@ -214,7 +239,7 @@ with open(input_motifs,"r") as fh_motif:
     for motif in fh_motif:
         current_motif = Motif(motif.strip().upper())
         known_motif_set.add(current_motif)
-print(known_motif_set)
+#print(known_motif_set)
 
 #Read in fasta and transform to onelinefasta with same name prefix
 input_filename = input_FASTA.split(".fa")[0]
@@ -222,15 +247,15 @@ output_filename = input_filename + "_temp.fasta"
 num_genes = bioinfo.oneline_fasta(input_FASTA,output_filename)
 
 #Initialize pycairo canvas coordinates for display - png format
-header_h = 300
-gene_h = 200
+header_h = 330
+gene_h = 320
 canvas_width, canvas_height = 1200,header_h+(gene_h*num_genes) #Change height to height for 1 gene * num_genes**********
 surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, canvas_width, canvas_height)
 #Initialize coordinates for drawing + add background
 context = cairo.Context(surface)
 context.set_source_rgb(1, 1, 1)
 context.paint()
-# Add title (Pycairo text - https://www.geeksforgeeks.org/pycairo-displaying-text/)
+# Add title
 title_text = "Motif Mark Map: " + input_filename
 write_Text(context,35,100,50,title_text)
 write_Text(context,15,50,80,"~*~"*(canvas_width//25-1))
@@ -241,7 +266,7 @@ draw_Legend(context,motif_colors,known_motif_set,canvas_width)
 #Read in oneline fasta
 i = 0 #Initialize counter - for testing
 n = 100 #X-axis counter - to adjust x coords for drawing per gene
-g = header_h+100 #Gene counter - adjusts y coords for drawing each gene (starts at header + space(100))
+g = header_h+120 #Gene counter - adjusts y coords for drawing each gene (starts at header + space(100))
 with open(output_filename,"r") as fh_fasta:
     while True:
         i += 1 #Increment record counter (starts w/ 1)
@@ -267,14 +292,8 @@ with open(output_filename,"r") as fh_fasta:
         currentExon = Exon(current_Xons[1],(n+len(current_Xons[0])),g,(n+len(current_Xons[0]+current_Xons[1])),g)
         currentDownIntron = Intron(current_Xons[2],(n+len(current_Xons[0]+current_Xons[1])),g,(n+len(current_Xons[0]+current_Xons[1]+current_Xons[2])),g)
         #Draw introns and exon objects to context/pycairo surface w/ current Gene title
-        # context.set_source_rgb(0,0,0)
-        # context.set_font_size(25)
-        # context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        # context.move_to(100, (currentUpIntron.Ly1 - 80))
-        gene_text = currentGene.name + " " + currentGene.chr + ": " + currentGene.startLoc + "-" + currentGene.endLoc
-        write_Text(context,25,100,(currentUpIntron.Ly1 - 80),gene_text)
-        # context.show_text(gene_text)
-        # context.stroke()
+        gene_text = "Gene: " + currentGene.name + "    Chr: " + currentGene.chr.split("r")[1] + "    Loc: " + currentGene.startLoc + "-" + currentGene.endLoc
+        write_Text(context,25,100,(currentUpIntron.Ly1 - 160),gene_text)
         currentUpIntron.draw_intron(context)
         currentExon.draw_exon(context)
         currentDownIntron.draw_intron(context)
@@ -291,9 +310,9 @@ with open(output_filename,"r") as fh_fasta:
         #print(mcoords_gene_dict)
         #Add gene motif map to current Gene object
         currentGene.motifmap = mcoords_gene_dict
-        currentGene.draw_motifmap(context,g,n,motif_colors,currentUpIntron,currentExon,currentDownIntron)
+        currentGene.draw_motifmap(context,g,n,motif_colors,currentUpIntron,currentExon,currentDownIntron,show_flag)
         #Increment n according to total x length drawn for this gene
-        g += (gene_h)
+        g += gene_h
 
 #Write surface to png - name using same prefix as input FASTA file
 surface.write_to_png(input_filename+".png")
