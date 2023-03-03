@@ -159,48 +159,44 @@ def write_Text(ctx4,font_size,start_x_coord,start_y_coord,content):
     ctx4.show_text(content)
     ctx4.stroke()
 
+def draw_Line(ctx6,lcolor,l_wid,lstart_x,lstart_y,lend_x,lend_y):
+    '''Draws a line to specified coordinates in specified color on passed pycairo context.'''
+    ctx6.set_source_rgb(lcolor[0], lcolor[1], lcolor[2])
+    ctx6.set_line_width(l_wid)
+    ctx6.move_to(lstart_x,lstart_y)  #(x1,y1)
+    ctx6.line_to(lend_x,lend_y) #(x2,y2)
+    ctx6.stroke()
+
+def draw_Rectangle(ctx7,rstart_x,rstart_y,r_width,r_height):
+    '''Draws a rectangle - black outline,transparent fill - at the specified coordinates on passed pycairo context.'''
+    ctx7.set_source_rgb(0, 0, 0)
+    ctx7.rectangle(rstart_x,rstart_y,r_width,r_height) #(startx,starty,width,height)
+    ctx7.set_line_width(2)
+    ctx7.stroke()
+
 def draw_Legend(ctx5,colors,motif_set,canvas_w):
     legend_margin = 50
     legend_w = canvas_w-100
     legend_h = 140
     #Draw legend box
-    ctx5.set_source_rgb(0, 0, 0)
-    ctx5.rectangle(legend_margin,legend_margin*2,legend_w,legend_h) #(startx,starty,width,height)
-    ctx5.set_line_width(2)
-    ctx5.stroke()
+    draw_Rectangle(ctx5,legend_margin,legend_margin*2,legend_w,legend_h)
     #Draw sample Intron
-    ctx5.set_line_width(10)
-    ctx5.move_to(legend_margin+40,(legend_h+200)/2)  #(x1,y1)
-    ctx5.line_to(legend_margin+80,(legend_h+200)/2) #(x2,y2)
-    ctx5.stroke()
+    draw_Line(ctx5,(0,0,0),10,legend_margin+40,(legend_h+200)/2,legend_margin+80,(legend_h+200)/2)
     write_Text(ctx5,25,legend_margin+100,(legend_h+215)/2,"Intron")
     #Draw sample Exon
-    ctx5.set_line_width(100)
-    ctx5.move_to((legend_margin+100)+120,(legend_h+200)/2)  #(x1,y1)
-    ctx5.line_to((legend_margin+100)+160,(legend_h+200)/2) #(x2,y2)
-    ctx5.stroke()
+    draw_Line(ctx5,(0,0,0),100,(legend_margin+100)+120,(legend_h+200)/2,(legend_margin+100)+160,(legend_h+200)/2)
     write_Text(ctx5,25,legend_margin+280,(legend_h+215)/2,"Exon")
     #Dividing line
-    ctx5.set_line_width(2)
-    ctx5.move_to((legend_margin+280)+100,legend_margin*2)  #(x1,y1)
-    ctx5.line_to((legend_margin+280)+100,legend_margin*2+legend_h) #(x2,y2)
-    ctx5.stroke()
+    draw_Line(ctx5,(0,0,0),2,(legend_margin+280)+100,legend_margin*2,(legend_margin+280)+100,legend_margin*2+legend_h)
     #Write Motif legend header
-    write_Text(ctx5,25,legend_margin+715,(legend_margin*2+30),"Motif")
+    write_Text(ctx5,25,legend_margin+710,(legend_margin*2+30),"Motifs")
     #Draw motif color legend
     m=0 #Increment start_x per motif
     num_mot = len(motif_set)
     count = 0 #Count iterations
     for m_type in motif_set:
-        ctx5.set_line_width(50)
-        m_red = motif_colors[count][0]
-        m_green = motif_colors[count][1]
-        m_blue = motif_colors[count][2]
-        ctx5.set_source_rgb(m_red,m_green,m_blue)
-        ctx5.move_to(legend_margin+420+m,(legend_h+230)/2)
-        ctx5.line_to(legend_margin+425+m,(legend_h+230)/2)
-        ctx5.stroke()
-        write_Text(ctx5,15,legend_margin+435+m,(legend_h+245)/2,m_type.mseq)
+        draw_Line(ctx5,(colors[count][0],colors[count][1],colors[count][2]),50,legend_margin+410+m,(legend_h+230)/2,legend_margin+410+len(m_type.mseq)+m,(legend_h+230)/2)
+        write_Text(ctx5,15,legend_margin+430+m,(legend_h+245)/2,m_type.mseq)
         if num_mot == 1:
             pass
         m += 140
@@ -221,12 +217,14 @@ with open(input_motifs,"r") as fh_motif:
 print(known_motif_set)
 
 #Read in fasta and transform to onelinefasta with same name prefix
-input_filename = input_FASTA.split(".fasta")[0]
+input_filename = input_FASTA.split(".fa")[0]
 output_filename = input_filename + "_temp.fasta"
 num_genes = bioinfo.oneline_fasta(input_FASTA,output_filename)
 
 #Initialize pycairo canvas coordinates for display - png format
-canvas_width, canvas_height = 1200,2000
+header_h = 300
+gene_h = 200
+canvas_width, canvas_height = 1200,header_h+(gene_h*num_genes) #Change height to height for 1 gene * num_genes**********
 surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, canvas_width, canvas_height)
 #Initialize coordinates for drawing + add background
 context = cairo.Context(surface)
@@ -243,7 +241,7 @@ draw_Legend(context,motif_colors,known_motif_set,canvas_width)
 #Read in oneline fasta
 i = 0 #Initialize counter - for testing
 n = 100 #X-axis counter - to adjust x coords for drawing per gene
-g = 200 + canvas_height/12 #Gene counter - adjusts y coords for drawing each gene
+g = header_h+100 #Gene counter - adjusts y coords for drawing each gene (starts at header + space(100))
 with open(output_filename,"r") as fh_fasta:
     while True:
         i += 1 #Increment record counter (starts w/ 1)
@@ -269,14 +267,14 @@ with open(output_filename,"r") as fh_fasta:
         currentExon = Exon(current_Xons[1],(n+len(current_Xons[0])),g,(n+len(current_Xons[0]+current_Xons[1])),g)
         currentDownIntron = Intron(current_Xons[2],(n+len(current_Xons[0]+current_Xons[1])),g,(n+len(current_Xons[0]+current_Xons[1]+current_Xons[2])),g)
         #Draw introns and exon objects to context/pycairo surface w/ current Gene title
-        # write_Text(context,)
-        context.set_source_rgb(0,0,0)
-        context.set_font_size(25)
-        context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        context.move_to(100, (currentUpIntron.Ly1 - 80))
+        # context.set_source_rgb(0,0,0)
+        # context.set_font_size(25)
+        # context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        # context.move_to(100, (currentUpIntron.Ly1 - 80))
         gene_text = currentGene.name + " " + currentGene.chr + ": " + currentGene.startLoc + "-" + currentGene.endLoc
-        context.show_text(gene_text)
-        context.stroke()
+        write_Text(context,25,100,(currentUpIntron.Ly1 - 80),gene_text)
+        # context.show_text(gene_text)
+        # context.stroke()
         currentUpIntron.draw_intron(context)
         currentExon.draw_exon(context)
         currentDownIntron.draw_intron(context)
@@ -295,7 +293,7 @@ with open(output_filename,"r") as fh_fasta:
         currentGene.motifmap = mcoords_gene_dict
         currentGene.draw_motifmap(context,g,n,motif_colors,currentUpIntron,currentExon,currentDownIntron)
         #Increment n according to total x length drawn for this gene
-        g += (canvas_height/12)
+        g += (gene_h)
 
 #Write surface to png - name using same prefix as input FASTA file
 surface.write_to_png(input_filename+".png")
