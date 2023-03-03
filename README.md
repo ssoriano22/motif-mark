@@ -8,7 +8,7 @@ The command line prompt format is as follows:
 
     motif-mark-oop.py -f Input_Sequences.fasta -m Motifs_of_Interest.txt [-s True/False]
 
-Where the options are as follows:
+Where the options are defined as:
 
     -f  FASTA input file (.fasta or .fa)
     -m  Motif input file (.txt)
