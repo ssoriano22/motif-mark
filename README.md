@@ -2,17 +2,17 @@
 
 ## Program Description
 
-This program visualizes motif sites in DNA or RNA sequences. A single FASTA file - ending in either ".fasta" or ".fa" - containing up to 10 gene sequences of 1000 bases or less is entered as input to the program. Each sequence in this file must have introns identified with lowercase bases and exons idenified with uppercase bases. Also entered as input is a ".txt" file of up to 5 motif sequences consisting of 10 bases or less, where each motif is one line of the file. Motif start positions can be shown or hidden in the final image.
+This program visualizes motif sites in DNA or RNA sequences. A single FASTA file - ending in either ".fasta" or ".fa" - containing up to 10 gene sequences of 1000 bases or less is entered as input to the program. Each sequence in this file must have introns identified with lowercase bases and exons identified with uppercase bases. Also entered as input is a ".txt" file of up to 5 motif sequences consisting of 10 bases or less, where each motif is one line of the file. Motif start positions can be shown or hidden in the final image.
 
 The command line prompt format is as follows:
 
-    motif-mark-oop.py -f Input_Sequences.fasta -m Motifs_of_Interest.txt [-s True/Fasle]
+    motif-mark-oop.py -f Input_Sequences.fasta -m Motifs_of_Interest.txt [-s True/False]
 
-Where:
+Where the options are as follows:
 
     -f  FASTA input file (.fasta or .fa)
     -m  Motif input file (.txt)
-    -s  Optional: True (show motif start positions) or False (hide motif start positions, default if not specified).
+    -s  Optional: True (show motif start positions) or False (hide motif start positions). Defaults to False if not specified.
 
 The resulting output is a ".png" image with the same prefix as the input FASTA file (i.e. "Figure_1.fasta" -> "Figure_1.png"). This image will contain: 
 * A title based on the input FASTA file
@@ -22,7 +22,7 @@ The resulting output is a ".png" image with the same prefix as the input FASTA f
     * Motif start locations can be toggled shown (-s True) or hidden (-s False, or default).
         * Start locations are staggered along the y-axis per motif type (i.e. left-most motif in legend starts closest to drawn gene, right-most motif in legend is furthest from drawn gene).
         * To avoid most print overlap situations, start locations are printed alternatively above and below the gene, per motif.
-        * **Warning:** In cases where a motif is repeated in close proximity, it is possible that these start locations will overlap.
+        * **Warning:** In cases where a single motif is repeated in close proximity, it is possible that these start locations will overlap.
 
 ## Assignment Requirements (from Bi625 Canvas):
 
